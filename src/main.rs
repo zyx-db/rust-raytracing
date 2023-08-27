@@ -1,4 +1,5 @@
 use log::info;
+mod vec3;
 
 fn main() {
     let image_height = 256;
