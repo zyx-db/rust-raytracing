@@ -1,8 +1,9 @@
 use std::fmt;
-use std::ops::{Add, Sub, Mul, AddAssign, MulAssign, DivAssign};
+use std::ops::{Add, Sub, Mul, AddAssign, MulAssign, Div, DivAssign};
 
+#[derive(Copy, Clone)]
 pub struct Color{
-    pub values: [f64; 3],
+    values: [f64; 3],
 }
 
 impl fmt::Display for Color {
@@ -20,6 +21,7 @@ impl Color{
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Vec3{
     pub values: [f64; 3],
 }
@@ -38,12 +40,32 @@ impl Vec3 {
     pub fn z(&self) -> f64{
         self.values[2]
     }
+
+    pub fn negative(&self) -> Vec3{
+        Vec3 { values: 
+            [-self.x(),
+            -self.y(),
+            -self.z()
+        ]}
+    }
+
+    pub fn unit_vector(&self) -> Vec3{
+        self / self.length()
+    }
+
+    pub fn length(&self) -> f64{
+        self.length_squared().sqrt()
+    }
+
+    fn length_squared(&self) -> f64{
+        self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
+    }
 }
 
-impl Add for Vec3{
+impl Add for &Vec3{
     type Output = Vec3;
 
-    fn add(self, other: Vec3) -> Vec3{
+    fn add(self, other: &Vec3) -> Vec3{
         Vec3 {values : 
             [self.x() + other.x(),
             self.y() + other.y(),
@@ -65,11 +87,76 @@ impl AddAssign for Vec3{
 impl Mul<f64> for Vec3{
     type Output = Vec3;
 
-    fn mul(self, rhs: f64) -> Vec3{
+    fn mul(self, other: f64) -> Vec3{
         Vec3 { values:
-            [self.x() * rhs,
-            self.y() * rhs,
-            self.z() * rhs]
+            [self.x() * other,
+            self.y() * other,
+            self.z() * other]
         }
+    }
+}
+
+impl MulAssign<f64> for Vec3{
+    fn mul_assign(&mut self, other: f64) {
+        *self = Vec3{values :
+            [self.x() * other,
+            self.y() * other,
+            self.z() * other]
+        }
+    }
+}
+
+impl Sub for Vec3{
+    type Output = Vec3;
+
+    fn sub(self, other: Vec3) -> Vec3{
+       Vec3 { values: 
+           [self.x() - other.x(),
+           self.y() - other.y(),
+           self.z() - other.z()]
+        } 
+    }
+}
+
+impl Div<f64> for &Vec3{
+    type Output = Vec3;
+
+    fn div(self, other: f64) -> Self::Output {
+        Vec3{values:
+            [self.x() / other,
+            self.y() / other,
+            self.z() / other]
+        }
+    }
+}
+
+impl DivAssign<f64> for Vec3{
+    fn div_assign(&mut self, other: f64) {
+       *self = Vec3{values: 
+           [self.x() / other,
+           self.y() / other,
+           self.z() / other]
+       } 
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Ray{
+   origin: Vec3,
+   direction: Vec3,
+}
+
+impl Ray{
+    pub fn new(o: Vec3, dir: Vec3) -> Ray{
+        Ray { origin: o, direction: dir }
+    }
+    pub fn origin(self) -> Vec3{
+        self.origin
+    }
+    pub fn direction(self) -> Vec3{
+        self.direction
+    }
+    pub fn at(self, t: f64) -> Vec3{
+        return &self.origin + &(self.direction * t)
     }
 }
