@@ -55,6 +55,10 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
+    pub fn dot(&self, other: Vec3) -> f64 {
+        self.x() * other.x() + self.y() * other.y() + self.z() * other.z()
+    }
+
     fn length_squared(&self) -> f64 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
     }
@@ -108,6 +112,20 @@ impl Sub for Vec3 {
     type Output = Vec3;
 
     fn sub(self, other: Vec3) -> Vec3 {
+        Vec3 {
+            values: [
+                self.x() - other.x(),
+                self.y() - other.y(),
+                self.z() - other.z(),
+            ],
+        }
+    }
+}
+
+impl Sub<&Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, other: &Vec3) -> Self::Output {
         Vec3 {
             values: [
                 self.x() - other.x(),
