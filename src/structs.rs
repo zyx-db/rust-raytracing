@@ -177,3 +177,95 @@ impl Ray {
         return &self.origin + &(self.direction * t);
     }
 }
+
+pub struct Sphere {
+    center: Vec3,
+    radius: f64,
+}
+
+impl Sphere {
+    pub fn new(c: Vec3, r: f64) -> Sphere {
+        Sphere {
+            center: c,
+            radius: r,
+        }
+    }
+}
+
+impl Hit for Sphere {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        // Do we get hit?
+        let oc = r.origin() - self.center;
+        let a = r.direction().length().powi(2);
+        let half_b = oc.dot(r.direction());
+        let c = oc.length().powi(2) - self.radius * self.radius;
+
+        let discriminant = half_b.powi(2) - a * c;
+        if discriminant < 0.0 {
+            return None;
+        }
+
+        // Find the nearest root in the range
+        let sqrtd = discriminant.sqrt();
+        let mut root = (-half_b - sqrtd) / a;
+        if root < t_min || t_max < root {
+            root = (-half_b + sqrtd) / a;
+            if root < t_min || t_max < root {
+                return None;
+            }
+        }
+
+        let point = r.at(root);
+        let mut rec = HitRecord {
+            t: root,
+            p: point,
+            normal: Vec3::new(0.0, 0.0, 0.0),
+            front_face: false
+        };
+
+        let outward_normal = &(point - self.center) / self.radius;
+        rec.set_face_normal(r, outward_normal);
+
+        Some(rec)
+    }
+}
+
+pub struct HitRecord {
+    pub p: Vec3,
+    pub normal: Vec3,
+    pub t: f64,
+    pub front_face: bool
+}
+
+impl HitRecord {
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
+        self.front_face = r.direction().dot(outward_normal) < 0.0; 
+        self. normal = if self.front_face {
+            outward_normal
+        } else {
+            outward_normal * -1.0
+        };
+    }
+}
+
+pub trait Hit {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+}
+
+pub type World = Vec<Box<dyn Hit>>;
+
+impl Hit for World {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut tmp_rec = None;
+        let mut current_closest = t_max;
+
+        for object in self {
+            if let Some(rec) = object.hit(r, t_min, current_closest) {
+                current_closest = rec.t;
+                tmp_rec = Some(rec);
+            }
+        }
+
+        tmp_rec
+    }
+}
