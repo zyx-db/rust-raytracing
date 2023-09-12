@@ -1,13 +1,18 @@
 use log::info;
-mod structs;
-use structs::{Color, Ray, Vec3, World, Hit, Sphere};
+mod extras;
+use crate::extras::color::Color;
+use crate::extras::hit::Hit;
+use crate::extras::ray::Ray;
+use crate::extras::sphere::Sphere;
+use crate::extras::vec3::Vec3;
+use crate::extras::world::World;
 
 fn ray_color(r: &Ray, world: &World) -> Color {
     if let Some(rec) = world.hit(r, 0.0, f64::INFINITY) {
         return Color::new(
             0.5 * (rec.normal.x() + 1.0),
             0.5 * (rec.normal.y() + 1.0),
-            0.5 * (rec.normal.z() + 1.0)
+            0.5 * (rec.normal.z() + 1.0),
         );
     }
     let unit_direction = r.direction().unit_vector();
