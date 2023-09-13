@@ -1,5 +1,7 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub};
 
+use rand::Rng;
+
 #[derive(Copy, Clone)]
 pub struct Vec3 {
     pub values: [f64; 3],
@@ -40,6 +42,22 @@ impl Vec3 {
 
     pub fn length_squared(&self) -> f64 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
+    }
+
+    pub fn random(lower: f64, upper: f64)-> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3 {
+            values: [rng.gen_range(lower..upper), rng.gen_range(lower..upper), rng.gen_range(lower..upper)]
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let v = Vec3::random(-1.0, 1.0);
+            if v.length() < 1.0 {
+                return v;
+            }
+        }
     }
 }
 
