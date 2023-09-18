@@ -1,11 +1,11 @@
-use super::vec3::Vec3;
 use super::ray::Ray;
+use super::vec3::Vec3;
 
 pub struct Camera {
     origin: Vec3,
     corner: Vec3,
     horizontal: Vec3,
-    vertical: Vec3
+    vertical: Vec3,
 }
 
 impl Camera {
@@ -20,18 +20,18 @@ impl Camera {
         let v = Vec3::new(0.0, VIEWPORT_HEIGHT, 0.0);
         let llc = orig - (h * 0.5) - (v * 0.5) - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
 
-        Camera { 
-            origin: orig, 
-            corner: llc, 
-            horizontal: h, 
-            vertical: v 
+        Camera {
+            origin: orig,
+            corner: llc,
+            horizontal: h,
+            vertical: v,
         }
     }
 
     pub fn get_ray(&self, u: f64, v: f64) -> Ray {
         return Ray::new(
             self.origin,
-            &(&self.corner + &(self.horizontal * u)) + &(self.vertical * v) - &self.origin         
+            &(&self.corner + &(self.horizontal * u)) + &(self.vertical * v) - &self.origin,
         );
     }
 }

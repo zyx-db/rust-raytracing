@@ -1,9 +1,12 @@
 use super::ray::Ray;
+use super::scatter::Scatter;
 use super::vec3::Vec3;
+use std::rc::Rc;
 
 pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
+    pub mat: Rc<dyn Scatter>,
     pub t: f64,
     pub front_face: bool,
 }

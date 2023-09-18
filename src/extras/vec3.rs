@@ -44,10 +44,14 @@ impl Vec3 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
     }
 
-    pub fn random(lower: f64, upper: f64)-> Vec3 {
+    pub fn random(lower: f64, upper: f64) -> Vec3 {
         let mut rng = rand::thread_rng();
         Vec3 {
-            values: [rng.gen_range(lower..upper), rng.gen_range(lower..upper), rng.gen_range(lower..upper)]
+            values: [
+                rng.gen_range(lower..upper),
+                rng.gen_range(lower..upper),
+                rng.gen_range(lower..upper),
+            ],
         }
     }
 
@@ -58,6 +62,15 @@ impl Vec3 {
                 return v;
             }
         }
+    }
+
+    pub fn near_zero(self) -> bool {
+        const TINY_VALUE: f64 = 1.0e-8;
+        self.x().abs() < TINY_VALUE && self.y().abs() < TINY_VALUE && self.z().abs() < TINY_VALUE
+    }
+
+    pub fn reflect(self, n: Vec3) -> Vec3 {
+        self - n * 2.0 * self.dot(n)
     }
 }
 
