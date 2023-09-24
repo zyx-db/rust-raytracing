@@ -5,6 +5,7 @@ use super::scatter::Scatter;
 use super::vec3::Vec3;
 use std::rc::Rc;
 
+#[derive(Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f64,
@@ -53,7 +54,7 @@ impl Hit for Sphere {
             front_face: false,
         };
 
-        let outward_normal = &(point - self.center) / self.radius;
+        let outward_normal = (point - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
 
         Some(rec)

@@ -16,7 +16,7 @@ impl Scatter for Lambertian {
         r_in: &super::ray::Ray,
         rec: &super::hit_record::HitRecord,
     ) -> Option<(Color, super::ray::Ray)> {
-        let mut scatter_dir = &rec.normal + &Vec3::random_in_unit_sphere().unit_vector();
+        let mut scatter_dir = rec.normal + Vec3::random_in_unit_sphere().unit_vector();
         if scatter_dir.near_zero() {
             scatter_dir = rec.normal;
         }

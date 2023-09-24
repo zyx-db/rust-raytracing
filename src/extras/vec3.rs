@@ -29,7 +29,7 @@ impl Vec3 {
     }
 
     pub fn unit_vector(&self) -> Vec3 {
-        self / self.length()
+        *self / self.length()
     }
 
     pub fn length(&self) -> f64 {
@@ -75,17 +75,17 @@ impl Vec3 {
 
     pub fn refract(self, n: Vec3, etai_over_etat: f64) -> Vec3 {
         let cos_theta = (self * (-1.0)).dot(n).min(1.0);
-        let r_out_perp = (&self + &(n * cos_theta)) * etai_over_etat;
+        let r_out_perp = (self + (n * cos_theta)) * etai_over_etat;
         let r_out_parallel = n * -((1.0 - r_out_perp.length_squared().abs()).sqrt());
 
-        &r_out_perp + &r_out_parallel
+        r_out_perp + r_out_parallel
     }
 }
 
-impl Add for &Vec3 {
+impl Add for Vec3 {
     type Output = Vec3;
 
-    fn add(self, other: &Vec3) -> Vec3 {
+    fn add(self, other: Vec3) -> Vec3 {
         Vec3 {
             values: [
                 self.x() + other.x(),
@@ -140,21 +140,7 @@ impl Sub for Vec3 {
     }
 }
 
-impl Sub<&Vec3> for Vec3 {
-    type Output = Vec3;
-
-    fn sub(self, other: &Vec3) -> Self::Output {
-        Vec3 {
-            values: [
-                self.x() - other.x(),
-                self.y() - other.y(),
-                self.z() - other.z(),
-            ],
-        }
-    }
-}
-
-impl Div<f64> for &Vec3 {
+impl Div<f64> for Vec3 {
     type Output = Vec3;
 
     fn div(self, other: f64) -> Self::Output {

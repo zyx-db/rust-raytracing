@@ -4,6 +4,7 @@ use super::ray::Ray;
 
 pub type World = Vec<Box<dyn Hit>>;
 
+// how will i implement this function with a BVH?
 impl Hit for World {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut tmp_rec = None;

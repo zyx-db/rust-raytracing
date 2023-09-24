@@ -88,4 +88,6 @@ fn main() {
             println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
         }
     }
+
+
 }
