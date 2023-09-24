@@ -9,3 +9,4 @@ pub mod scatter;
 pub mod sphere;
 pub mod vec3;
 pub mod world;
+pub mod dielectric;
