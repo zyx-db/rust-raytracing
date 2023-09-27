@@ -1,5 +1,6 @@
 pub mod camera;
 pub mod color;
+pub mod dielectric;
 pub mod hit;
 pub mod hit_record;
 pub mod lambertian;
@@ -9,4 +10,3 @@ pub mod scatter;
 pub mod sphere;
 pub mod vec3;
 pub mod world;
-pub mod dielectric;

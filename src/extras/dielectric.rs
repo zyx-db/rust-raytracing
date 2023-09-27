@@ -1,5 +1,5 @@
+use super::{color::Color, ray::Ray, scatter::Scatter};
 use rand::Rng;
-use super::{scatter::Scatter, color::Color, ray::Ray};
 
 pub struct Dielectric {
     ir: f64,
@@ -7,7 +7,9 @@ pub struct Dielectric {
 
 impl Dielectric {
     pub fn new(index_of_refraction: f64) -> Dielectric {
-        Dielectric { ir: (index_of_refraction) }
+        Dielectric {
+            ir: (index_of_refraction),
+        }
     }
 
     fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
@@ -18,7 +20,11 @@ impl Dielectric {
 }
 
 impl Scatter for Dielectric {
-    fn scatter(&self, r_in: &super::ray::Ray, rec: &super::hit_record::HitRecord) -> Option<(super::color::Color, super::ray::Ray)> {
+    fn scatter(
+        &self,
+        r_in: &super::ray::Ray,
+        rec: &super::hit_record::HitRecord,
+    ) -> Option<(super::color::Color, super::ray::Ray)> {
         let refraction_ratio = if rec.front_face {
             1.0 / self.ir
         } else {
