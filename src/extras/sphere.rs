@@ -3,17 +3,17 @@ use super::hit_record::HitRecord;
 use super::ray::Ray;
 use super::scatter::Scatter;
 use super::vec3::Vec3;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f64,
-    mat: Rc<dyn Scatter>,
+    mat: Arc<dyn Scatter>,
 }
 
 impl Sphere {
-    pub fn new(c: Vec3, r: f64, m: Rc<dyn Scatter>) -> Sphere {
+    pub fn new(c: Vec3, r: f64, m: Arc<dyn Scatter>) -> Sphere {
         Sphere {
             center: c,
             radius: r,
