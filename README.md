@@ -1,6 +1,4 @@
 # Goals
-- moving camera
-- rayon to parallelize the render
 - encoding output to GIF
 - render multiple frames
 - allow objects to move
