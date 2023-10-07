@@ -129,7 +129,7 @@ fn main() {
     println!("255");
 
     for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {}", (j + 1));
+        eprint!("\rScanlines remaining: {}       ", (j + 1));
 
         let scanline: Vec<Color> = (0..IMAGE_WIDTH).into_par_iter().map(|i| {
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
