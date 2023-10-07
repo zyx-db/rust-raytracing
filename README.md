@@ -1,3 +1,5 @@
+![cover image](results/cover.jpg)
+
 # Goals
 - encoding output to GIF
 - render multiple frames
