@@ -1,6 +1,7 @@
 // TODO: DOUBLE CHECK IMPL TO MAKE SURE IM NOT MISSING ANY HEIGHT
 use std::collections::HashMap;
 
+use super::minmax::{min, max};
 use super::hit::Hit;
 use super::hit_record::HitRecord;
 use super::ray::Ray;
@@ -10,7 +11,7 @@ use super::vec3::Vec3;
 const NULL_NODE: usize = 0xffffffff;
 
 #[derive(Clone)]
-pub struct AABB {
+pub struct AABB { 
     pub surface_area: f64,
     pub close_corner: Vec3,
     pub far_corner: Vec3,
@@ -38,6 +39,33 @@ impl AABB {
         let close_corner = Vec3::min(first.close_corner, second.close_corner);
         let far_corner = Vec3::max(first.far_corner, second.far_corner);
         AABB::new(close_corner, far_corner)
+    }
+
+    // fast slab method
+    // outlined here
+    // https://tavianator.com/2015/ray_box_nan.html
+    pub fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> bool {
+        let mut tmin = t_min;
+        let mut tmax = t_max;
+
+        let t1 = (self.close_corner.x() - r.origin().x()) / r.direction().x();
+        let t2 = (self.far_corner.x() - r.origin().x()) / r.direction().x();
+        
+        let t3 = (self.close_corner.y() - r.origin().y()) / r.direction().y();
+        let t4 = (self.far_corner.y() - r.origin().y()) / r.direction().y();
+
+        let t5 = (self.close_corner.z() - r.origin().z()) / r.direction().z();
+        let t6 = (self.far_corner.z() - r.origin().z()) / r.direction().z();
+
+        tmin = max(tmin, min(t1, t2));
+        tmin = max(tmin, min(t3, t4));
+        tmin = max(tmin, min(t5, t6));
+
+        tmax = min(tmax, max(t1, t2));
+        tmax = min(tmax, max(t3, t4));
+        tmax = min(tmax, max(t5, t6));
+
+        tmax > tmin
     }
 }
 
@@ -77,7 +105,8 @@ pub struct Tree {
     node_count: usize,
     capacity: usize,
     free_list: usize,
-    spheres: HashMap<usize, usize>
+    sphere_map: HashMap<usize, usize>,
+    spheres: Vec<Box<Sphere>>
 }
 
 impl Tree {
@@ -97,7 +126,8 @@ impl Tree {
             node_count: 0,
             capacity,
             free_list: 0,
-            spheres: HashMap::new()
+            sphere_map: HashMap::new(),
+            spheres: Vec::new()
         }
     }
 
@@ -135,7 +165,15 @@ impl Tree {
         self.node_count -= 1;
     }
 
-    pub fn push(&mut self, object_idx: usize, lower_bound: Vec3, upper_bound: Vec3){
+    pub fn push(&mut self, val: Box<Sphere>) {
+        let idx = self.spheres.len();
+        let lower_bound = val.lower_bound();
+        let upper_bound = val.upper_bound();
+        self.spheres.push(val);
+        self.insert_object(idx, lower_bound, upper_bound)
+    }
+
+    pub fn insert_object(&mut self, object_idx: usize, lower_bound: Vec3, upper_bound: Vec3){
         let node = self.allocate_node();
         self.nodes[node].aabb.close_corner = lower_bound;
         self.nodes[node].aabb.far_corner = upper_bound;
@@ -147,14 +185,14 @@ impl Tree {
 
         self.insert_leaf(node);
         
-        self.spheres.insert(object_idx, node);
+        self.sphere_map.insert(object_idx, node);
 
         self.nodes[node].particle = object_idx;
     }
 
     pub fn remove_object(&mut self, object_idx: usize) {
-        let node = self.spheres.get(&object_idx).cloned().unwrap();
-        self.spheres.remove(&object_idx);
+        let node = self.sphere_map.get(&object_idx).cloned().unwrap();
+        self.sphere_map.remove(&object_idx);
 
         self.remove_leaf(node);
         self.free_node(node);
@@ -448,5 +486,44 @@ impl Tree {
         }
 
         node
+    }
+}
+
+impl Hit for Tree {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        if self.root == NULL_NODE { return None; }
+
+        let mut stack = vec![self.root];
+        let mut tmp_rec = None;
+        let mut current_closest = t_max;
+
+        while stack.len() > 0 {
+            let cur_idx = stack.pop().unwrap();
+            // we hit this container
+            let cur_node = &self.nodes[cur_idx];
+            if cur_node.aabb.hit(r, t_min, current_closest) {
+                // if its a leaf we check the related object
+                if cur_node.is_leaf() { 
+                    let sphere_idx = cur_node.particle;
+                    let obj = &self.spheres[sphere_idx];
+                    if let Some(rec) = obj.hit(r, t_min, current_closest){
+                       current_closest = rec.t; 
+                       tmp_rec = Some(rec);
+                    }
+                }
+
+                // else we add the children
+                else {
+                    if cur_node.left != NULL_NODE {
+                        stack.push(cur_node.left);
+                    }
+                    if cur_node.right != NULL_NODE {
+                        stack.push(cur_node.right);
+                    }
+                }
+            }
+        }
+
+        tmp_rec
     }
 }
