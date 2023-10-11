@@ -1,20 +1,21 @@
 extern crate rayon;
-mod extras;
-use crate::extras::camera::Camera;
-use crate::extras::color::Color;
-use crate::extras::dielectric::Dielectric;
-use crate::extras::hit::Hit;
-use crate::extras::lambertian::Lambertian;
-use crate::extras::metal::Metal;
-use crate::extras::ray::Ray;
-use crate::extras::sphere::Sphere;
-use crate::extras::vec3::Vec3;
-use crate::extras::world::World;
+mod utils;
+use crate::utils::camera::Camera;
+use crate::utils::color::Color;
+use crate::utils::dielectric::Dielectric;
+use crate::utils::hit::Hit;
+use crate::utils::lambertian::Lambertian;
+use crate::utils::metal::Metal;
+use crate::utils::ray::Ray;
+use crate::utils::sphere::Sphere;
+use crate::utils::vec3::Vec3;
+use crate::utils::world::World;
 use rand::Rng;
+use utils::aabb::Tree;
 use std::sync::Arc;
 use rayon::prelude::*;
 
-fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
+fn ray_color(r: &Ray, world: &Tree, depth: u64) -> Color {
     if depth <= 0 {
         return Color::new(0.0, 0.0, 0.0);
     }
@@ -34,9 +35,9 @@ fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
     )
 }
 
-fn random_scene() -> World {
+fn random_scene() -> Tree {
     let mut rng = rand::thread_rng();
-    let mut world = World::new();
+    let mut world = Tree::new(1);
 
     let ground_mat = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
     let ground_sphere = Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, ground_mat);
@@ -99,10 +100,10 @@ fn random_scene() -> World {
 fn main() {
     // Image
     const ASPECT_RATIO: f64 = 3.0 / 2.0;
-    const IMAGE_WIDTH: u64 = 400;
+    const IMAGE_WIDTH: u64 = 600;
     const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
-    const SAMPLES_PER_PIXEL: u64 = 100;
-    const MAX_DEPTH: u64 = 25;
+    const SAMPLES_PER_PIXEL: u64 = 200;
+    const MAX_DEPTH: u64 = 50;
 
     // World
     let world = random_scene();
@@ -151,4 +152,5 @@ fn main() {
         }
 
     }
+    eprintln!();
 }

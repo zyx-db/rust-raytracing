@@ -90,6 +90,14 @@ impl Vec3 {
 
         r_out_perp + r_out_parallel
     }
+
+    pub fn min(a: Vec3, b: Vec3) -> Vec3 {
+        Vec3::new(a.x().min(b.x()), a.y().min(b.y()), a.z().min(b.z()))
+    }
+
+    pub fn max(a: Vec3, b: Vec3) -> Vec3 {
+        Vec3::new(a.x().max(b.x()), a.y().max(b.y()), a.z().max(b.z()))
+    }
 }
 
 impl Add for Vec3 {

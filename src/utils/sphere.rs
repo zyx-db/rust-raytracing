@@ -20,6 +20,15 @@ impl Sphere {
             mat: m,
         }
     }
+
+    pub fn lower_bound(&self) -> Vec3 {
+        let r = self.radius;
+        self.center - Vec3::new(r, r, r)
+    }
+    pub fn upper_bound(&self) -> Vec3 {
+        let r = self.radius;
+        self.center + Vec3::new(r, r, r)
+    }
 }
 
 impl Hit for Sphere {
