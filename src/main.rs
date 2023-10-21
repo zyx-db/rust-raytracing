@@ -23,46 +23,46 @@ fn random_scene() -> Tree {
 
     world.push(Box::new(ground_sphere));
 
-    for a in 0..5 {
-        for b in 0..5 {
-            let choose_mat: f64 = rng.gen();
-            let center = Vec3::new((a as f64) + rng.gen_range(0.0..0.9),
-                                     0.2,
-                                     (b as f64) + rng.gen_range(0.0..0.9));
-            let movement = Vec3::new((a as f64) + rng.gen_range(0.0..0.9),
-                                     0.2,
-                                     (b as f64) + rng.gen_range(0.0..0.9));
+    // for a in 0..5 {
+    //     for b in 0..5 {
+    //         let choose_mat: f64 = rng.gen();
+    //         let center = Vec3::new((a as f64) + rng.gen_range(0.0..0.9),
+    //                                  0.2,
+    //                                  (b as f64) + rng.gen_range(0.0..0.9));
+    //         let movement = Vec3::new((a as f64) + rng.gen_range(0.0..0.9),
+    //                                  0.2,
+    //                                  (b as f64) + rng.gen_range(0.0..0.9));
 
-            if choose_mat < 0.8 {
-                // Diffuse
-                let r = rng.gen_range(0.0..1.0);
-                let b = rng.gen_range(0.0..1.0);
-                let g = rng.gen_range(0.0..1.0);
-                let albedo = Color::new(r, g, b);
-                let sphere_mat = Arc::new(Lambertian::new(albedo));
-                let sphere = Sphere::new(center, 0.2, sphere_mat, movement);
+    //         if choose_mat < 0.8 {
+    //             // Diffuse
+    //             let r = rng.gen_range(0.0..1.0);
+    //             let b = rng.gen_range(0.0..1.0);
+    //             let g = rng.gen_range(0.0..1.0);
+    //             let albedo = Color::new(r, g, b);
+    //             let sphere_mat = Arc::new(Lambertian::new(albedo));
+    //             let sphere = Sphere::new(center, 0.2, sphere_mat, movement);
 
-                world.push(Box::new(sphere));
-            } else if choose_mat < 0.95 {
-                // Metal
-                let r = rng.gen_range(0.4..1.0);
-                let b = rng.gen_range(0.4..1.0);
-                let g = rng.gen_range(0.4..1.0);
-                let albedo = Color::new(r, g, b);
-                let fuzz = rng.gen_range(0.0..0.5);
-                let sphere_mat = Arc::new(Metal::new(albedo, fuzz));
-                let sphere = Sphere::new(center, 0.2, sphere_mat, movement);
+    //             world.push(Box::new(sphere));
+    //         } else if choose_mat < 0.95 {
+    //             // Metal
+    //             let r = rng.gen_range(0.4..1.0);
+    //             let b = rng.gen_range(0.4..1.0);
+    //             let g = rng.gen_range(0.4..1.0);
+    //             let albedo = Color::new(r, g, b);
+    //             let fuzz = rng.gen_range(0.0..0.5);
+    //             let sphere_mat = Arc::new(Metal::new(albedo, fuzz));
+    //             let sphere = Sphere::new(center, 0.2, sphere_mat, movement);
 
-                world.push(Box::new(sphere));
-            } else {
-                // Glass
-                let sphere_mat = Arc::new(Dielectric::new(1.5));
-                let sphere = Sphere::new(center, 0.2, sphere_mat, movement);
+    //             world.push(Box::new(sphere));
+    //         } else {
+    //             // Glass
+    //             let sphere_mat = Arc::new(Dielectric::new(1.5));
+    //             let sphere = Sphere::new(center, 0.2, sphere_mat, movement);
 
-                world.push(Box::new(sphere));
-            }
-        }
-    }
+    //             world.push(Box::new(sphere));
+    //         }
+    //     }
+    // }
 
     let mat1 = Arc::new(Dielectric::new(1.5));
     let mat2 = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
@@ -115,6 +115,7 @@ fn main() {
     // render
     let mut file = File::create("results/test.gif").unwrap();
     let mut encoder = gif::Encoder::new(&mut file, IMAGE_WIDTH as u16, IMAGE_HEIGHT as u16, &[]).unwrap();
+    encoder.set_repeat(gif::Repeat::Infinite).unwrap();
 
     let mut i = 0;
     for _ in 0..frames{
