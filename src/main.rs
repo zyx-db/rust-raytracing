@@ -9,7 +9,6 @@ use crate::utils::metal::Metal;
 use crate::utils::ray::Ray;
 use crate::utils::sphere::Sphere;
 use crate::utils::vec3::Vec3;
-use crate::utils::world::World;
 use rand::Rng;
 use utils::aabb::Tree;
 use std::sync::Arc;
