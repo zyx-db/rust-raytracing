@@ -90,7 +90,7 @@ impl Camera {
         )
 }
 
-    pub fn render(self, world: Tree) -> Vec<u8>{
+    pub fn render(&self, world: &Tree) -> Vec<u8>{
         let mut full_image: Vec<u8> = Vec::new();
         for j in (0..self.image_height).rev() {
             let scanline: Vec<Color> = (0..self.image_width).into_par_iter().map(|i| {

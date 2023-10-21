@@ -10,14 +10,16 @@ pub struct Sphere {
     center: Vec3,
     radius: f64,
     mat: Arc<dyn Scatter>,
+    movement: Vec3,
 }
 
 impl Sphere {
-    pub fn new(c: Vec3, r: f64, m: Arc<dyn Scatter>) -> Sphere {
+    pub fn new(c: Vec3, r: f64, m: Arc<dyn Scatter>, d: Vec3) -> Sphere {
         Sphere {
             center: c,
             radius: r,
             mat: m,
+            movement: d,
         }
     }
 
@@ -25,9 +27,14 @@ impl Sphere {
         let r = self.radius;
         self.center - Vec3::new(r, r, r)
     }
+
     pub fn upper_bound(&self) -> Vec3 {
         let r = self.radius;
         self.center + Vec3::new(r, r, r)
+    }
+
+    pub fn step_frame(&self, time_delta: f64) -> Sphere{
+        Sphere::new(self.center + (self.movement * time_delta), self.radius, self.mat.clone(), self.movement)
     }
 }
 

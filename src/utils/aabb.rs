@@ -110,6 +110,14 @@ pub struct Tree {
 }
 
 impl Tree {
+    pub fn from(spheres: Vec<Box<Sphere>>) -> Tree {
+        let mut tree = Tree::new(spheres.len()*2);
+        for sphere in spheres {
+            tree.push(sphere);
+        }
+        tree
+    }
+
     pub fn new(capacity: usize) -> Tree {
         let mut nodes = vec![Node::default(); capacity];
 
@@ -191,7 +199,11 @@ impl Tree {
     }
 
     pub fn remove_object(&mut self, object_idx: usize) {
-        let node = self.sphere_map.get(&object_idx).cloned().unwrap();
+        let possible = self.sphere_map.get(&object_idx).cloned();
+        if possible == None { 
+            return;
+        }
+        let node = possible.unwrap();
         self.sphere_map.remove(&object_idx);
 
         self.remove_leaf(node);
@@ -487,6 +499,15 @@ impl Tree {
 
         node
     }
+
+    pub fn step_frame(&mut self, time_delta: f64) -> Tree{
+        let old_spheres = self.spheres.clone();
+        let new_spheres: Vec<Box<Sphere>> = old_spheres
+            .iter()
+            .map(|s| Box::new(s.step_frame(time_delta)))
+            .collect();
+        Tree::from(new_spheres)
+    }
 }
 
 impl Hit for Tree {
@@ -498,7 +519,11 @@ impl Hit for Tree {
         let mut current_closest = t_max;
 
         while stack.len() > 0 {
-            let cur_idx = stack.pop().unwrap();
+            let top = stack.pop();
+            
+            assert!(top != None);
+
+            let cur_idx = top.unwrap();
             // we hit this container
             let cur_node = &self.nodes[cur_idx];
             if cur_node.aabb.hit(r, t_min, current_closest) {
