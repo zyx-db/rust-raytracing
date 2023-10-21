@@ -1,38 +1,18 @@
 extern crate rayon;
+extern crate gif;
 mod utils;
-use crate::utils::camera::Camera;
-use crate::utils::color::Color;
-use crate::utils::dielectric::Dielectric;
-use crate::utils::hit::Hit;
-use crate::utils::lambertian::Lambertian;
-use crate::utils::metal::Metal;
-use crate::utils::ray::Ray;
-use crate::utils::sphere::Sphere;
-use crate::utils::vec3::Vec3;
+use utils::camera::Camera;
+use utils::color::Color;
+use utils::dielectric::Dielectric;
+use utils::lambertian::Lambertian;
+use utils::metal::Metal;
+use utils::sphere::Sphere;
+use utils::vec3::Vec3;
 use rand::Rng;
 use utils::aabb::Tree;
+use std::fs::File;
 use std::sync::Arc;
-use rayon::prelude::*;
-
-fn ray_color(r: &Ray, world: &Tree, depth: u64) -> Color {
-    if depth <= 0 {
-        return Color::new(0.0, 0.0, 0.0);
-    }
-
-    if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
-        if let Some((attentuation, scattered)) = rec.mat.scatter(r, &rec) {
-            return ray_color(&scattered, world, depth - 1) * attentuation;
-        }
-    }
-
-    let unit_direction = r.direction().unit_vector();
-    let a = 0.5 * (unit_direction.y() + 1.0);
-    Color::new(
-        (1.0 - a) + (a * 0.5),
-        (1.0 - a) + (a * 0.7),
-        (1.0 - a) + (a * 1.0),
-    )
-}
+use gif::Frame;
 
 fn random_scene() -> Tree {
     let mut rng = rand::thread_rng();
@@ -120,36 +100,18 @@ fn main() {
                           20.0,
                           ASPECT_RATIO,
                           aperture,
-                          dist_to_focus);
+                          dist_to_focus,
+                          IMAGE_HEIGHT,
+                          IMAGE_WIDTH,
+                          SAMPLES_PER_PIXEL,
+                          MAX_DEPTH);
 
     // render
 
-    println!("P3");
-    println!("{IMAGE_WIDTH} {IMAGE_HEIGHT}");
-    println!("255");
+    let pixels = cam.render(world);
+    let frame = Frame::from_rgb(IMAGE_WIDTH as u16, IMAGE_HEIGHT as u16, &pixels);
+    let mut file = File::create("results/test.gif").unwrap();
+    let mut encoder = gif::Encoder::new(&mut file, frame.width, frame.height, &[]).unwrap();
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {}       ", (j + 1));
-
-        let scanline: Vec<Color> = (0..IMAGE_WIDTH).into_par_iter().map(|i| {
-            let mut pixel_color = Color::new(0.0, 0.0, 0.0);
-            for _ in 0..SAMPLES_PER_PIXEL {
-                let mut rng = rand::thread_rng();
-                let random_u: f64 = rng.gen();
-                let random_v: f64 = rng.gen();
-
-                let u = ((i as f64) + random_u) / ((IMAGE_WIDTH - 1) as f64);
-                let v = ((j as f64) + random_v) / ((IMAGE_HEIGHT - 1) as f64);
-                let r = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world, MAX_DEPTH);
-            }
-            pixel_color
-        }).collect();
-
-        for pixel_color in scanline {
-            println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
-        }
-
-    }
-    eprintln!();
+    encoder.write_frame(&frame).unwrap();
 }

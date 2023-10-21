@@ -26,6 +26,30 @@ impl Color {
 
         format!("{} {} {}", ir, ig, ib)
     }
+
+    pub fn r(self, samples_per_pixel: u64) -> u8 {
+        let ir: u8 = (256.0
+            * (self.values[0] / (samples_per_pixel as f64))
+                .sqrt()
+                .clamp(0.0, 0.999)) as u8;
+        ir
+    }
+
+    pub fn g(self, samples_per_pixel: u64) -> u8 {
+        let ig: u8 = (256.0
+            * (self.values[1] / (samples_per_pixel as f64))
+                .sqrt()
+                .clamp(0.0, 0.999)) as u8;
+        ig
+    }
+
+    pub fn b(self, samples_per_pixel: u64) -> u8 {
+        let ib: u8 = (256.0
+            * (self.values[2] / (samples_per_pixel as f64))
+                .sqrt()
+                .clamp(0.0, 0.999)) as u8;
+        ib
+    }
 }
 
 impl AddAssign for Color {
